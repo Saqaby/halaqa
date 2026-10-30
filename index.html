@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>متابعة الحلقة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f4f6f5;
+  --card:#ffffff;
+  --text:#1d2b26;
+  --muted:#6b7a74;
+  --line:#e2e8e5;
+  --primary:#1f7a5c;
+  --primary-soft:#e3f2ec;
+  --accent:#c98a1b;
+  --accent-soft:#fbf1df;
+  --danger:#c0392b;
+  --wa:#25D366;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#121816;
+    --card:#1b2420;
+    --text:#e8efec;
+    --muted:#93a39c;
+    --line:#2b3632;
+    --primary:#3fb68b;
+    --primary-soft:#1e3a30;
+    --accent:#e2a944;
+    --accent-soft:#3a2f1c;
+    --danger:#e06656;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:"Tajawal",system-ui,sans-serif;font-size:16px;
+  -webkit-tap-highlight-color:transparent;
+}
+.wrap{max-width:640px;margin:0 auto;padding:16px 16px 120px}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+
+/* رأس الصفحة */
+.head{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.head h1{flex:1;margin:0;font-size:1.5rem;font-weight:800;line-height:1.3;word-break:break-word}
+.icon-btn{
+  border:1px solid var(--line);background:var(--card);border-radius:10px;
+  width:40px;height:40px;display:grid;place-items:center;flex-shrink:0;
+}
+
+/* التاريخ */
+.date-bar{
+  display:flex;align-items:center;gap:8px;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:8px;margin-bottom:12px;
+}
+.date-mid{flex:1;text-align:center;position:relative}
+.date-mid .day{font-weight:700;font-size:1.05rem}
+.date-mid .sub{color:var(--muted);font-size:.85rem}
+.date-mid input[type=date]{position:absolute;inset:0;opacity:0;width:100%;cursor:pointer}
+.today-link{border:0;background:none;color:var(--primary);font-size:.8rem;padding:0;text-decoration:underline}
+
+/* أزرار الكل */
+.bulk{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.bulk button{
+  border:0;border-radius:12px;padding:12px 8px;font-weight:700;
+}
+.bulk .b-att{background:var(--primary-soft);color:var(--primary)}
+.bulk .b-done{background:var(--accent-soft);color:var(--accent)}
+
+/* القائمة */
+.list{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.list-head,.row{
+  display:grid;grid-template-columns:28px 1fr 64px 64px;align-items:center;gap:8px;padding:10px 12px;
+}
+.list-head{font-size:.8rem;color:var(--muted);border-bottom:1px solid var(--line);font-weight:700}
+.list-head span:nth-child(n+3){text-align:center}
+.row+.row{border-top:1px solid var(--line)}
+.num{color:var(--muted);font-size:.85rem;text-align:center}
+.name{font-weight:500;word-break:break-word;min-width:0}
+.name input{
+  width:100%;border:1px solid var(--primary);border-radius:8px;padding:6px 8px;background:var(--bg);
+}
+.chk{display:grid;place-items:center}
+.chk input{
+  appearance:none;-webkit-appearance:none;width:30px;height:30px;margin:0;
+  border:2px solid var(--line);border-radius:8px;background:var(--bg);display:grid;place-items:center;
+  transition:background .12s,border-color .12s;
+}
+.chk input::after{content:"";width:8px;height:14px;border:solid #fff;border-width:0 3px 3px 0;transform:rotate(45deg) translate(-1px,-1px);opacity:0}
+.chk input:checked::after{opacity:1}
+.chk.att input:checked{background:var(--primary);border-color:var(--primary)}
+.chk.done input:checked{background:var(--accent);border-color:var(--accent)}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+
+.stats{display:flex;justify-content:center;gap:16px;color:var(--muted);font-size:.9rem;margin:10px 0}
+.stats b{color:var(--text)}
+
+/* الإضافة */
+.add{display:flex;gap:8px;margin-top:12px}
+.add input{
+  flex:1;min-width:0;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--card);
+}
+.add button{border:0;border-radius:12px;padding:0 18px;background:var(--primary);color:#fff;font-weight:700}
+
+/* وضع التعديل */
+.edit-tools{display:flex;gap:6px}
+.edit-tools button{border:1px solid var(--line);background:var(--bg);border-radius:8px;width:32px;height:32px;display:grid;place-items:center;padding:0}
+.edit-tools .del{color:var(--danger)}
+.editing .list-head,.editing .row{grid-template-columns:28px 1fr auto}
+.editing .chk,.editing .list-head span:nth-child(n+3){display:none}
+.editing .bulk{display:none}
+
+/* واتساب */
+.export{
+  position:fixed;inset:auto 0 0 0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));
+  background:linear-gradient(to top,var(--bg) 70%,transparent);
+}
+.export button{
+  display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:608px;margin:0 auto;
+  border:0;border-radius:14px;padding:14px;background:var(--wa);color:#fff;font-weight:800;font-size:1.05rem;
+  box-shadow:0 4px 14px rgba(37,211,102,.35);
+}
+.export svg{width:26px;height:26px}
+
+.toast{
+  position:fixed;left:50%;bottom:96px;transform:translateX(-50%) translateY(20px);opacity:0;
+  background:var(--text);color:var(--bg);padding:10px 18px;border-radius:999px;font-weight:700;
+  transition:.2s;pointer-events:none;white-space:nowrap;
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* شاشة البداية */
+.setup{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:24px;margin-top:40px;text-align:center}
+.setup h2{margin:0 0 6px}
+.setup p{color:var(--muted);margin:0 0 16px}
+.setup input{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--bg);margin-bottom:12px;text-align:center}
+.setup button{width:100%;border:0;border-radius:12px;padding:12px;background:var(--primary);color:#fff;font-weight:700}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+
+  <!-- شاشة البداية: تسجيل اسم الحلقة -->
+  <section class="setup" id="setup" hidden>
+    <h2>أهلًا بك</h2>
+    <p>ابدأ بتسجيل اسم الحلقة</p>
+    <form id="setupForm">
+      <input id="setupName" placeholder="مثال: حلقة الفجر" required autocomplete="off">
+      <button type="submit">حفظ والمتابعة</button>
+    </form>
+  </section>
+
+  <!-- الشاشة الرئيسية -->
+  <main id="main" hidden>
+    <div class="head">
+      <h1 id="title"></h1>
+      <button class="icon-btn" id="editBtn" title="تعديل الحلقة والطلاب" aria-label="تعديل">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+      </button>
+    </div>
+
+    <div class="date-bar">
+      <button class="icon-btn" id="prevDay" aria-label="اليوم السابق">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+      <div class="date-mid">
+        <div class="day" id="dayName"></div>
+        <div class="sub" id="dayDate"></div>
+        <input type="date" id="datePick" aria-label="اختيار التاريخ">
+      </div>
+      <button class="icon-btn" id="nextDay" aria-label="اليوم التالي">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+    </div>
+    <div style="text-align:center;margin:-4px 0 12px" id="todayWrap" hidden>
+      <button class="today-link" id="goToday">العودة إلى اليوم</button>
+    </div>
+
+    <div class="bulk">
+      <button class="b-att" id="allAtt">تحضير الجميع</button>
+      <button class="b-done" id="allDone">إنجاز الجميع</button>
+    </div>
+
+    <div class="list">
+      <div class="list-head"><span>#</span><span>الطالب</span><span>الحضور</span><span>الإنجاز</span></div>
+      <div id="rows"></div>
+    </div>
+
+    <div class="stats" id="stats"></div>
+
+    <form class="add" id="addForm">
+      <input id="addName" placeholder="اسم طالب جديد" autocomplete="off" required>
+      <button type="submit">إضافة</button>
+    </form>
+  </main>
+</div>
+
+<div class="export" id="exportBar" hidden>
+  <button id="exportBtn">
+    <svg viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M17.47 14.38c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.49-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.61-.92-2.21-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.21 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.26.49 1.69.63.71.23 1.36.19 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.69.25-1.29.17-1.41-.07-.12-.27-.2-.57-.35M12.05 21.5h-.01a9.4 9.4 0 0 1-4.8-1.31l-.34-.2-3.57.94.95-3.48-.22-.36a9.4 9.4 0 0 1-1.44-5.02c0-5.2 4.23-9.43 9.44-9.43 2.52 0 4.89.98 6.67 2.77a9.37 9.37 0 0 1 2.76 6.67c0 5.2-4.23 9.43-9.44 9.43m8.03-17.46A11.27 11.27 0 0 0 12.05.72C5.8.72.71 5.8.7 12.06c0 2 .52 3.95 1.52 5.67L.6 23.28l5.69-1.49a11.34 11.34 0 0 0 5.75 1.47h.01c6.26 0 11.35-5.09 11.35-11.34 0-3.03-1.18-5.88-3.32-8.02"/></svg>
+    تصدير إلى واتساب
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const KEY = 'halaqa-tracker-v1';
+const $ = id => document.getElementById(id);
+
+// البيانات: { name, students:[{id,name}], records:{ 'YYYY-MM-DD': { id:{a:bool,d:bool} } } }
+let data = load();
+let currentDate = todayStr();
+let editing = false;
+
+function load(){
+  try{ return JSON.parse(localStorage.getItem(KEY)) || {name:'',students:[],records:{}}; }
+  catch(e){ return {name:'',students:[],records:{}}; }
+}
+function save(){
+  try{ localStorage.setItem(KEY, JSON.stringify(data)); }
+  catch(e){ toast('تعذّر الحفظ على الجهاز'); }
+}
+
+// التاريخ بالتوقيت المحلي
+function pad(n){ return String(n).padStart(2,'0'); }
+function toStr(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+function fromStr(s){ const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d); }
+function todayStr(){ return toStr(new Date()); }
+function shiftDay(n){ const d = fromStr(currentDate); d.setDate(d.getDate()+n); currentDate = toStr(d); render(); }
+function dayName(s){ return fromStr(s).toLocaleDateString('ar',{weekday:'long'}); }
+function fmtDate(s){ const d = fromStr(s); return pad(d.getDate())+'/'+pad(d.getMonth()+1)+'/'+d.getFullYear(); }
+
+function rec(id){
+  const day = data.records[currentDate] || {};
+  return day[id] || {a:false,d:false};
+}
+function setRec(id, field, val){
+  const day = data.records[currentDate] || (data.records[currentDate] = {});
+  const r = day[id] || (day[id] = {a:false,d:false});
+  r[field] = val;
+  save();
+}
+
+function esc(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function render(){
+  const hasName = !!data.name;
+  $('setup').hidden = hasName;
+  $('main').hidden = !hasName;
+  $('exportBar').hidden = !hasName || editing;
+  if(!hasName){ $('setupName').focus(); return; }
+
+  document.body.classList.toggle('editing', editing);
+  $('title').innerHTML = editing
+    ? '<input id="titleInput" value="'+esc(data.name)+'" style="width:100%;font:inherit;border:1px solid var(--primary);border-radius:10px;padding:4px 8px;background:var(--card)">'
+    : esc(data.name);
+  $('editBtn').innerHTML = editing
+    ? '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+    : '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>';
+  $('editBtn').title = editing ? 'حفظ التعديلات' : 'تعديل الحلقة والطلاب';
+
+  $('dayName').textContent = dayName(currentDate);
+  $('dayDate').textContent = fmtDate(currentDate);
+  $('datePick').value = currentDate;
+  $('todayWrap').hidden = currentDate === todayStr();
+
+  const rows = $('rows');
+  if(!data.students.length){
+    rows.innerHTML = '<div class="empty">لا يوجد طلاب بعد — أضف أول طالب من الأسفل</div>';
+  } else {
+    rows.innerHTML = data.students.map((s,i) => {
+      const r = rec(s.id);
+      if(editing){
+        return '<div class="row" data-id="'+s.id+'"><span class="num">'+(i+1)+'</span>'
+          + '<span class="name"><input value="'+esc(s.name)+'" data-rename="'+s.id+'"></span>'
+          + '<span class="edit-tools">'
+          + '<button data-move="-1" aria-label="أعلى">▲</button>'
+          + '<button data-move="1" aria-label="أسفل">▼</button>'
+          + '<button class="del" data-del aria-label="حذف">✕</button></span></div>';
+      }
+      return '<div class="row" data-id="'+s.id+'"><span class="num">'+(i+1)+'</span>'
+        + '<span class="name">'+esc(s.name)+'</span>'
+        + '<label class="chk att"><input type="checkbox" data-f="a" '+(r.a?'checked':'')+' aria-label="حضور '+esc(s.name)+'"></label>'
+        + '<label class="chk done"><input type="checkbox" data-f="d" '+(r.d?'checked':'')+' aria-label="إنجاز '+esc(s.name)+'"></label></div>';
+    }).join('');
+  }
+  renderStats();
+}
+
+function counts(){
+  let a=0,d=0;
+  data.students.forEach(s => { const r = rec(s.id); if(r.a) a++; if(r.d) d++; });
+  return {a,d,n:data.students.length};
+}
+function renderStats(){
+  const c = counts();
+  $('stats').innerHTML = c.n ? 'الحضور: <b>'+c.a+'/'+c.n+'</b>&nbsp; الإنجاز: <b>'+c.d+'/'+c.n+'</b>' : '';
+  $('allAtt').textContent = c.n && c.a===c.n ? 'إلغاء تحضير الجميع' : 'تحضير الجميع';
+  $('allDone').textContent = c.n && c.d===c.n ? 'إلغاء إنجاز الجميع' : 'إنجاز الجميع';
+}
+
+function setAll(field){
+  if(!data.students.length) return;
+  const c = counts();
+  const val = (field==='a' ? c.a : c.d) !== c.n; // إن كان الكل محددًا يُلغى التحديد
+  data.students.forEach(s => setRec(s.id, field, val));
+  render();
+}
+
+function commitEdits(){
+  const t = document.getElementById('titleInput');
+  if(t && t.value.trim()) data.name = t.value.trim();
+  document.querySelectorAll('[data-rename]').forEach(inp => {
+    const s = data.students.find(x => x.id === inp.dataset.rename);
+    if(s && inp.value.trim()) s.name = inp.value.trim();
+  });
+  save();
+}
+
+// نص واتساب
+function buildText(){
+  const lines = [];
+  lines.push('*'+data.name+'*');
+  lines.push('📅 '+dayName(currentDate)+' '+fmtDate(currentDate));
+  lines.push('');
+  data.students.forEach((s,i) => {
+    const r = rec(s.id);
+    lines.push((i+1)+'. '+s.name+' — '+(r.a?'✅ حاضر':'❌ غائب')+' | '+(r.d?'✅ أنجز':'❌ لم ينجز'));
+  });
+  const c = counts();
+  lines.push('');
+  lines.push('الحضور: '+c.a+'/'+c.n+' — الإنجاز: '+c.d+'/'+c.n);
+  return lines.join('\n');
+}
+async function copyText(text){
+  try{ await navigator.clipboard.writeText(text); return true; }
+  catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    let ok = false; try{ ok = document.execCommand('copy'); }catch(_){}
+    ta.remove(); return ok;
+  }
+}
+
+let toastTimer;
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// الأحداث
+$('setupForm').addEventListener('submit', e => {
+  e.preventDefault();
+  data.name = $('setupName').value.trim();
+  if(data.name){ save(); render(); }
+});
+$('addForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const name = $('addName').value.trim();
+  if(!name) return;
+  if(editing) commitEdits();
+  data.students.push({id: Date.now().toString(36)+Math.random().toString(36).slice(2,6), name});
+  save(); $('addName').value = ''; render(); $('addName').focus();
+});
+$('rows').addEventListener('change', e => {
+  const f = e.target.dataset.f; if(!f) return;
+  setRec(e.target.closest('.row').dataset.id, f, e.target.checked);
+  renderStats();
+});
+$('rows').addEventListener('click', e => {
+  const btn = e.target.closest('button'); if(!btn) return;
+  const id = btn.closest('.row').dataset.id;
+  const idx = data.students.findIndex(s => s.id === id);
+  commitEdits();
+  if(btn.hasAttribute('data-del')){
+    if(!confirm('حذف الطالب "'+data.students[idx].name+'"؟')) return;
+    data.students.splice(idx,1);
+    Object.values(data.records).forEach(day => delete day[id]);
+  } else if(btn.dataset.move){
+    const j = idx + Number(btn.dataset.move);
+    if(j<0 || j>=data.students.length) return;
+    [data.students[idx], data.students[j]] = [data.students[j], data.students[idx]];
+  }
+  save(); render();
+});
+$('editBtn').addEventListener('click', () => { if(editing) commitEdits(); editing = !editing; render(); });
+$('prevDay').addEventListener('click', () => shiftDay(-1));
+$('nextDay').addEventListener('click', () => shiftDay(1));
+$('goToday').addEventListener('click', () => { currentDate = todayStr(); render(); });
+$('datePick').addEventListener('change', e => { if(e.target.value){ currentDate = e.target.value; render(); } });
+$('allAtt').addEventListener('click', () => setAll('a'));
+$('allDone').addEventListener('click', () => setAll('d'));
+$('exportBtn').addEventListener('click', async () => {
+  if(!data.students.length){ toast('أضف طلابًا أولًا'); return; }
+  toast(await copyText(buildText()) ? 'تم النسخ — الصقه في واتساب' : 'تعذّر النسخ');
+});
+
+render();
+</script>
+</body>
+</html>
